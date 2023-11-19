@@ -1,0 +1,58 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Build/Tests/stm32h755xx_libs_test.elf",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "preLaunchTask": "Clean & Build Test",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb-multiarch",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Cortex Debug m4",
+            "cwd": "${workspaceFolder}",
+            "type": "cortex-debug",
+            "executable": "./Build/m4/stm32h755xx_libs_m4.elf",
+            "request": "launch",
+            "servertype": "stutil",
+            "preLaunchTask": "Flash Core m4",
+            "device": "STM32H755XX",
+            "interface": "swd",
+            "serialNumber": "",
+            "runToEntryPoint": "main",
+            "svdFile": "STM32H755_CM4.svd",
+            "v1": false,
+            "showDevDebugOutput": "both"
+        },
+        {
+            "name": "Cortex Debug m7",
+            "cwd": "${workspaceFolder}",
+            "type": "cortex-debug",
+            "executable": "./Build/m7/stm32h755xx_libs_m7.elf",
+            "request": "launch",
+            "servertype": "stutil",
+            "preLaunchTask": "Flash Core m7",
+            "device": "STM32H755XX",
+            "interface": "swd",
+            "serialNumber": "",
+            "runToEntryPoint": "main",
+            "svdFile": "STM32H755_CM7.svd",
+            "v1": false,
+            "showDevDebugOutput": "both"
+        }
+    ]
+}
