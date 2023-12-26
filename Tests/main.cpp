@@ -1,72 +1,69 @@
 #include <iostream>
+#include <InputPin.hh>
+#define CORE_CM7
+#include <stm32h755xx.h>
+#include <ClassMembersWithTagHandler.hh>
 
-//<------------------------------INCLUDES------------------------------>//
-/**
- * @brief Concept to assert if a template parameter is an enum 
- */
-template <typename T>
-concept EnumType = std::is_enum_v<T>;
-#include <type_traits>
-#include <Register.hh>
-//<-------------------------------------------------------------------->//
+using namespace std::string_literals;
 
+using GpioStateRegisterPair = pair<InputPinProperties::pinState, volatile unsigned int*>;
+using GpioOtherPropRegisterPair = pair<InputPinProperties::otherProp, volatile unsigned int*>;
+GpioStateRegisterPair a{&(GPIOA->ODR)};
+GpioOtherPropRegisterPair b{&(GPIOA->AFR[0])};
+using GpioSettings = Utils::TypeList<GpioStateRegisterPair, GpioOtherPropRegisterPair>;
+InputPinHandler<GpioSettings> A{a, b};
 
-class IPeripheral
-{
-private:
-    /* data */
-public:
-
-    virtual ~IPeripheral() = default;
-    virtual void init() = 0;
-    virtual void reset() = 0;
-};
-
-
-class IOPin : public IPeripheral
-{
-    private:
-    public:
-        virtual ~IOPin() = default;
-        virtual void write(const bool status) = 0;
-        virtual bool read() = 0;
-        virtual void setInputMode() = 0;
-        virtual void setOutputMode() = 0;
-};
-
-
-
-template <UnsignedIntegralPointerConcept UnsignedIntegralPtr>
-class IOPinBase : public IOPin
-{
-private:
-    Register<UnsignedIntegralPtr> instance;
-    const uint8_t pinNumber;
-public:
-};
-
-    //constexpr explicit IOPin (const uint8_t pinNumber) : pinNumber(pinNumber) { };
-    //~IOPin() { }
-
-    //void init() override { }
-    //void reset() override { }
-
-    //void write(const bool status) override { }
-    //bool read() override { }
-    //void setInputMode() override { }
-    //void setOutputMode() override { }
-
-
-
-
-volatile uint32_t a = 32;
-Register<volatile uint32_t*> *aR = Register<volatile uint32_t*>::getInstance(&a);
-uint32_t b {12};
 
 
 int main(void)
 {
-    uint32_t bb {12};
-    std::cout << aR->get() << std::endl;
     return 0;
 }
+
+#ifdef compile
+
+
+enum class GpioProps { clockFrequency, outputState, container, instances, objects };
+
+
+using ClockFreqPair = pair<GpioProps::clockFrequency, int>;
+using OutputStatePair = pair<GpioProps::outputState, bool>;
+using ContainerPair32 = pair<GpioProps::container, Cont<uint32_t>>;
+
+
+Cont<uint32_t> a;
+Cont<uint32_t> b{616};
+classMembersWithTags<ClockFreqPair, OutputStatePair> AB{32, false};
+classMembersWithTags<ClockFreqPair, OutputStatePair, ContainerPair32> AV{32, false, b};
+
+template<typename T>
+struct Cont
+{
+    public:
+        using t = T;
+        T v;
+        Cont() {}
+        Cont(T&& v) : v(v) {}
+         // Copy constructor
+        Cont(const Cont& other) : v(other.v) {}
+        // Move constructor
+        Cont(Cont&& other) noexcept : v(std::move(other.v)) {}
+        ~Cont(){}
+        //Cont<T>& operator=(T&& other) { v = std::move(other); return *this; }
+        //Cont<T>& operator=(const T& other) { v = other; return *this; }
+        // Move assignment operator
+        Cont& operator=(Cont&& other) noexcept {
+            if (this != &other) {
+                v = std::move(other.v);
+            }
+            return *this;
+        }
+        Cont<T>& operator=(const Cont<T>& other) {
+            if (this != &other) { // Guard against self-assignment
+                v = other.v; 
+            }
+            return *this;
+        }
+};
+
+#endif

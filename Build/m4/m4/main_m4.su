@@ -1,0 +1,2 @@
+../../Core/m4/main_m4.cpp:9:5:int main()	4	static
+../../Core/m4/main_m4.cpp:16:6:void SystemInit()	4	static

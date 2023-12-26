@@ -17,8 +17,8 @@ INC_DIRS := $(shell find ../../Core -type d -name .svn -prune -o -type d -print)
 INC_FLAGS := $(addprefix -I, $(INC_DIRS))
 C_FLAGS_DEF := $(addprefix -I, $(INC_DIRS)) -mthumb -mcpu=cortex-m4 -specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -g3 -O0 -ffunction-sections -fdata-sections -fexceptions -Wall -fstack-usage
 CXX_FLAGS_DEF := $(addprefix -I, $(INC_DIRS)) -mthumb -mcpu=cortex-m4 -specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -g3 -O0 -ffunction-sections -fdata-sections -fexceptions -Wall -fstack-usage -fno-rtti -fno-use-cxa-atexit
-TEST_C_FLAGS_DEF := -std=gnu11 -g3 -O0 -Wall $(addprefix -I, $(INC_DIRS))
-TEST_CXX_FLAGS_DEF := -std=c++20 -g3 -O0 -Wall $(addprefix -I, $(INC_DIRS))
+TEST_C_FLAGS_DEF := -fpermissive -std=gnu11 -g3 -O0 -Wall $(addprefix -I, $(INC_DIRS))
+TEST_CXX_FLAGS_DEF := -fpermissive -std=c++20 -g3 -O0 -Wall $(addprefix -I, $(INC_DIRS))
 LINKER_FLAGS := -Wl,-Map=$(TARGET:.elf=.map),--cref -mthumb -mcpu=cortex-m4 -specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group -Wl,--print-memory-usage
 
 CXX_SOURCES_CORE := $(shell find ../../Core -name '*.cpp'  -not -path "../../Core/m7/*")
