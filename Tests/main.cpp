@@ -1,22 +1,15 @@
-#define CORE_CM7
 #include <iostream>
 #include <InputPin.hh>
-#include <PeripheralBaseHandler.hh>
-#include <stm32h755xx.h>
 
 using namespace std::string_literals;
 
 volatile uint32_t MODER = 0b11110101101010101100110000001111;
 volatile uint32_t ODR = 124;
 
-InputPinHandler fdsa {&MODER, &ODR};
+InputPin<0> pin0 {&MODER, &ODR};
 
 int main(void)
 {
-    fdsa.getRegisterValue<IPinHandlerProperties::mode>();
-    fdsa.clearRegisterValue<IPinHandlerProperties::mode>();
-    auto _1 { fdsa.getParam<InputPinProperties::pinState>() };
-    auto _2 { fdsa.getParam<IPinHandlerProperties::pinNumber>() };
     
     return 0;
 }

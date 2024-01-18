@@ -49,7 +49,7 @@ private:
 public:
     template<typename ModeRegister, typename StateRegister>
     requires((Utils::UnsignedIntegralPointerConcept<ModeRegister> && Utils::UnsignedIntegralPointerConcept<StateRegister>))
-    explicit InputPin(const ModeRegister moder, const StateRegister ) {}
+    explicit InputPin(const ModeRegister moder, const StateRegister ) { _handler.setParam<IPinHandlerProperties::pinNumber>(pinNumber); }
     ~InputPin() {}
 
     void init() override {}

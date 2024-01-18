@@ -16,8 +16,8 @@ protected:
     const std::size_t pinNumber{PinNumber};
 
 public:
-    constexpr IPin() = default;
-    constexpr ~IPin() override = default;
+    //constexpr IPin() = default;
+    //constexpr ~IPin() override = default;
 };
 
 
