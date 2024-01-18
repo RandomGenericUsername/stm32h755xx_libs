@@ -4,19 +4,9 @@
 #include <type_traits>
 #include <Utils.hh>
 
-template<typename T, template <auto, typename> class PairType>
-concept IsPair = requires {
-    typename T::tag;   // Ensure T has a nested 'tag' type
-    typename T::type;  // Ensure T has a nested 'type' type
-    requires std::is_same_v<T, PairType<T::tag::value, typename T::type>>;
-};
-
-
 template<auto EnumValue, typename Type>
 requires Utils::IsEnumConcept<decltype(EnumValue)>
 class pair {
-    
-
     private:
         Type value;
     public:
@@ -33,9 +23,12 @@ class pair {
         using type = Type;
 };
 
+template <typename T, typename U>
+concept ConvertibleLimited = std::is_same_v<T, U>  /* your custom conditions */;
+
 
 template<typename... Pairs>
-    requires (IsPair<Pairs, pair> && ...)
+    requires (Utils::IsPair<Pairs, pair> && ...)
 class classMembersWithTags {
     private:
         std::tuple<typename Pairs::type...> members;
@@ -44,8 +37,7 @@ class classMembersWithTags {
 
         template<typename... Types>
         constexpr explicit classMembersWithTags(Types&&... values)
-        requires ((std::is_same_v<std::decay_t<Types>, typename Pairs::type> || 
-               std::is_constructible_v<typename Pairs::type, Types>) && ...)
+            requires ((ConvertibleLimited<std::decay_t<Types>, typename Pairs::type> && ...))
             : members(std::forward<Types>(values)...) { }
 
          // Set method

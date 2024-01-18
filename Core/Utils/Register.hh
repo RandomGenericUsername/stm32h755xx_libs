@@ -9,46 +9,35 @@
 #include <algorithm>    //For this for std::find_if
 //<-------------------------------------------------------------------->//
 
-
-template <typename T>
-concept UnsignedIntegralConcept = std::is_unsigned_v<T> && std::is_integral_v<T>;
-
-/**
- * @brief Concept defining an a pointer to a unsigned integral type.
- */
-template <typename T>
-concept UnsignedIntegralPointerConcept = 
-    (std::is_pointer_v<T> && std::is_unsigned_v<std::remove_pointer_t<std::remove_cv_t<T>>> && std::is_integral_v<std::remove_pointer_t<std::remove_cv_t<T>>>);
-
 /**
  * @brief Interface for a generic register.
  * @tparam UnsignedIntegralPtr The type of pointer to a unsigned integral type.
  */
-template <UnsignedIntegralPointerConcept UnsignedIntegralPtr>
+template <Utils::UnsignedIntegralPointerConcept UnsignedIntegralPtr>
 class IRegister {
 public:
     using ValueType = std::remove_pointer_t<UnsignedIntegralPtr>;
     /**
      * @brief Virtual destructor using the default implementation.
      */
-    virtual ~IRegister() = default;
+    constexpr virtual ~IRegister() = default;
 
     /**
      * @brief Get the current value of the register.
      * @return UnsignedIntegralPtr Current value of the register.
      */
-    virtual ValueType const get() const = 0;
+    constexpr virtual ValueType const get() const = 0;
 
     /**
      * @brief Set the value of the register.
      * @param value New value to set.
      */
-    virtual void set(ValueType value) = 0;
+    constexpr virtual void set(ValueType value) = 0;
 
     /**
      * @brief Clear the register (set all bits to 0).
      */
-    virtual void clear() = 0;
+    constexpr virtual void clear() = 0;
 
     /**
      * @brief Check if a specific bit is set.
@@ -56,7 +45,7 @@ public:
      * @return true If the bit is set.
      * @return false If the bit is not set.
      */
-    virtual bool checkBit(std::size_t position) const = 0;
+    constexpr virtual bool checkBit(std::size_t position) const = 0;
 
     /**
      * @brief Check if specific bits at a position are set.
@@ -65,41 +54,41 @@ public:
      * @return true If the bits are set.
      * @return false If the bits are not set.
      */
-    virtual bool checkBits(ValueType bitsMask, std::size_t position) const = 0;
+    constexpr virtual bool checkBits(ValueType bitsMask, std::size_t position = 0) const = 0;
 
     /**
      * @brief Set a specific bit at a given position.
      * @param position Starting position to set bit.
      */
-    virtual void setBit(std::size_t position) = 0;
+    constexpr virtual void setBit(std::size_t position) = 0;
 
     /**
      * @brief Clear a specific bit at a given position.
      * @param position Starting position to clear bit.
      */
-    virtual void clearBit(std::size_t position) = 0;
+    constexpr virtual void clearBit(std::size_t position) = 0;
 
     /**
      * @brief Set specific bits at a position.
      * @param bitsMask Bits mask to set.
      * @param position Starting position to set from.
      */
-    virtual void setBits(ValueType bitsMask, std::size_t position = 0) = 0;
+    constexpr virtual void setBits(ValueType bitsMask, std::size_t position = 0) = 0;
 
     /**
      * @brief Get the position of the lowest set bit.
      * @return UnsignedIntegralPtr Position of the lowest set bit.
      */
-    virtual std::size_t const getLowestIndex() const = 0;
+    constexpr virtual std::size_t const getLowestIndex() const = 0;
 
     /**
      * @brief Get the position of the highest set bit.
      * @return UnsignedIntegralPtr Position of the highest set bit.
      */
-    virtual std::size_t const getHighestIndex() const = 0;
+    constexpr virtual std::size_t const getHighestIndex() const = 0;
 
 
-    virtual UnsignedIntegralPtr const getAddress() const = 0;
+    constexpr virtual UnsignedIntegralPtr const getAddress() const = 0;
 
 };
 
@@ -108,7 +97,7 @@ public:
  * @brief Represents a Register with various utility functions.
  * @tparam UnsignedIntegralPtr The type of the register, must be an unsigned integral type.
  */
-template <UnsignedIntegralPointerConcept UnsignedIntegralPtr>
+template <Utils::UnsignedIntegralPointerConcept UnsignedIntegralPtr>
 class Register : public IRegister<UnsignedIntegralPtr>{
 
     public:
@@ -120,25 +109,25 @@ class Register : public IRegister<UnsignedIntegralPtr>{
          * @brief Construct a new Register object.
          * @param n Initial value of the register.
          */
-        explicit Register(UnsignedIntegralPtr n) : address(n) {}
-        ~Register() { }
+        constexpr explicit Register(UnsignedIntegralPtr n) : address(n) {}
+        constexpr ~Register() { }
 
         /**
          * @brief Get the value of the register.
          * @return UnsignedIntegralPtr Value of the register.
          */
-        ValueType const get() const override { return *(this->address); }
+        constexpr ValueType const get() const override { return *(this->address); }
 
         /**
          * @brief Set the value of the register.
          * @param n New value to set.
          */
-        void set(const ValueType n) override { *(this->address) = n; }
+        constexpr void set(const ValueType n) override { *(this->address) = n; }
 
         /**
          * @brief Clear the register (set all bits to 0).
          */
-        void clear() override{ *(this->address) = 0; }
+        constexpr void clear() override{ *(this->address) = 0; }
 
         /**
          * @brief Check if a specific bit is set.
@@ -146,8 +135,8 @@ class Register : public IRegister<UnsignedIntegralPtr>{
          * @return true If the bit is set.
          * @return false If the bit is not set.
          */
-        bool checkBit(const std::size_t position) const override {
-            return (0x1 << position) & *(this->address);
+        constexpr bool checkBit(const std::size_t position) const override {
+            return (0x1 << position) & (*(this->address));
         }
 
         /**
@@ -157,19 +146,21 @@ class Register : public IRegister<UnsignedIntegralPtr>{
          * @return true If the bits are set.
          * @return false If the bits are not set.
          */
-        bool checkBits(const ValueType bitsMask, const std::size_t position) const override {
-            ValueType isolatedBits = (*(this->address) >> position) & ((1 << (position + 1)) - 1);
-            return isolatedBits == bitsMask;
+        constexpr bool checkBits(const ValueType bitsMask, const std::size_t position = 0) const override {
+            ValueType mask = bitsMask << position; // Shift the bitsMask to the correct position
+            ValueType isolatedBits = (*(this->address) & mask); // Isolate the bits from the register value
+            return isolatedBits == mask; // Check if isolated bits match the shifted bitsMask
         }
 
         /**
          * @brief Set a specific bit at a given position
          * @param Starting position to set bit
         */
-        void setBit(const std::size_t position) override {
+        constexpr void setBit(const std::size_t position) override {
             //*(this->address) |= 0x1 << position;
             ValueType val = *(this->address);
-            val |= 0x1 << position;
+            //val |= 0x1 << position;
+            val = val | (0x1 << position);
             *(this->address) = val;
         }
 
@@ -178,10 +169,10 @@ class Register : public IRegister<UnsignedIntegralPtr>{
          * @brief Clear a specific bit at a given position
          * @param Starting position to clear bit
         */
-        void clearBit(const std::size_t position) override {
+        constexpr void clearBit(const std::size_t position) override {
             //*(this->address) &= ~(0x1 << position);
             ValueType val = *(this->address);
-            val &= ~(0x1 << position);
+            val = val & ~(0x1 << position);
             *(this->address) = val;
         }
 
@@ -190,7 +181,7 @@ class Register : public IRegister<UnsignedIntegralPtr>{
          * @param bitsMask Bits mask to set.
          * @param position Starting position to set from.
          */
-        void setBits(const ValueType bitsMask, const std::size_t position = 0) override {
+        constexpr void setBits(const ValueType bitsMask, const std::size_t position = 0) override {
             //bool condition = position > sizeof(UnsignedIntegralPtr) * 8 - 1;
             /**
              *  bits -> 0b101 
@@ -224,17 +215,17 @@ class Register : public IRegister<UnsignedIntegralPtr>{
          * @brief Get the position of the lowest set bit.
          * @return UnsignedIntegralPtr Position of the lowest set bit.
          */
-        std::size_t const getLowestIndex() const override { return getLowestIndexHelper<0>(); }
+        constexpr std::size_t const getLowestIndex() const override { return getLowestIndexHelper<0>(); }
 
         /**
          * @brief Get the position of the highest set bit.
          * @return UnsignedIntegralPtr Position of the highest set bit.
          */
-        std::size_t const getHighestIndex() const override { return getHighestIndexHelper<sizeof(ValueType) * 8 - 1>(); }
+        constexpr std::size_t const getHighestIndex() const override { return getHighestIndexHelper<sizeof(ValueType) * 8 - 1>(); }
 
 
 
-        UnsignedIntegralPtr const getAddress() const override{ return address; }
+        constexpr UnsignedIntegralPtr const getAddress() const override{ return address; }
 
 
     private:
@@ -264,89 +255,91 @@ class Register : public IRegister<UnsignedIntegralPtr>{
             UnsignedIntegralPtr const address;
 
         // Declare SRegister as a friend
-        //template <UnsignedIntegralPointerConcept>
+        //template <Utils::UnsignedIntegralPointerConcept>
         //friend class SRegister;
 
-        template <UnsignedIntegralPointerConcept>
+        template <Utils::UnsignedIntegralPointerConcept>
         friend class UniquePtrRegister;
 };
 
 
 
-template <UnsignedIntegralPointerConcept UnsignedIntegralPtr>
+template <Utils::UnsignedIntegralPointerConcept UnsignedIntegralPtr>
 class UniquePtrRegister : public IRegister<UnsignedIntegralPtr> {
 public:
 
     //Type of the value pointed to by the pointer
     using ValueType = typename IRegister<UnsignedIntegralPtr>::ValueType;
 
-    ValueType const get() const override { return registerPtr->get(); }
+    constexpr ValueType const get() const override { return registerPtr->get(); }
 
-    void set(ValueType value) override {
+    constexpr void set(ValueType value) override {
         registerPtr->set(value);
     }
 
-    void clear() override {
+    constexpr void clear() override {
         registerPtr->clear();
     }
 
-    bool checkBit(std::size_t position) const override {
+    constexpr bool checkBit(std::size_t position) const override {
         return registerPtr->checkBit(position);
     }
 
-    bool checkBits(ValueType bitsMask, std::size_t position) const override {
+    constexpr bool checkBits(ValueType bitsMask, std::size_t position = 0) const override {
         return registerPtr->checkBits(bitsMask, position);
     }
 
-    void setBit(std::size_t position) override {
+    constexpr void setBit(std::size_t position) override {
         registerPtr->setBit(position);
     }
 
-    void clearBit(std::size_t position) override {
+    constexpr void clearBit(std::size_t position) override {
         registerPtr->clearBit(position);
     }
 
-    void setBits(ValueType bitsMask, std::size_t position = 0) override {
+    constexpr void setBits(ValueType bitsMask, std::size_t position = 0) override {
         registerPtr->setBits(bitsMask, position);
     }
 
-    std::size_t const getLowestIndex() const override {
+    constexpr std::size_t const getLowestIndex() const override {
         return registerPtr->getLowestIndex();
     }
 
-    std::size_t const getHighestIndex() const override {
+    constexpr std::size_t const getHighestIndex() const override {
         return registerPtr->getHighestIndex();
     }
 
-    UnsignedIntegralPtr const getAddress() const override { return registerPtr->getAddress(); }
+    constexpr UnsignedIntegralPtr const getAddress() const override { return registerPtr->getAddress(); }
 
 private:
 
-    explicit UniquePtrRegister(UnsignedIntegralPtr address)
+    constexpr explicit UniquePtrRegister(UnsignedIntegralPtr address)
             : registerPtr(std::make_unique<Register<UnsignedIntegralPtr>>(address)) {}
 
     std::unique_ptr<Register<UnsignedIntegralPtr>> registerPtr;
 
-    template <UnsignedIntegralPointerConcept>
+    template <Utils::UnsignedIntegralPointerConcept>
     friend class SRegister;
 
 };
 
 
-template <UnsignedIntegralPointerConcept UnsignedIntegralPtr>
+template <Utils::UnsignedIntegralPointerConcept UnsignedIntegralPtr>
 class SRegister : public UniquePtrRegister<UnsignedIntegralPtr> {
 //
     private:
 
-        explicit SRegister(UnsignedIntegralPtr n) : UniquePtrRegister<UnsignedIntegralPtr>(n) {}
-        //Construct On First Use Idiom
+        constexpr explicit SRegister(UnsignedIntegralPtr n) : UniquePtrRegister<UnsignedIntegralPtr>(n) {}
+
         // Function to access the instances vector
         static std::vector<UniquePtrRegister<UnsignedIntegralPtr>*>& getInstances() {
             // Local static variable
+            //Construct On First Use Idiom
             static std::vector<UniquePtrRegister<UnsignedIntegralPtr>*> instances;
             return instances;
         }
-        static UniquePtrRegister<UnsignedIntegralPtr>* createInstance(UnsignedIntegralPtr n) 
+
+        constexpr static UniquePtrRegister<UnsignedIntegralPtr>* createInstance(UnsignedIntegralPtr n) 
         {
             #ifdef DEBUG_PRINT
                 std::cout << "Created instance to register: " << std::hex << reinterpret_cast<std::uintptr_t>(n) << std::dec << std::endl;
@@ -383,7 +376,7 @@ class SRegister : public UniquePtrRegister<UnsignedIntegralPtr> {
     public:
         SRegister(const SRegister&) = delete;
         SRegister& operator=(const SRegister&) = delete;
-        ~SRegister() override = default;
+        constexpr ~SRegister() override = default;
         constexpr static UniquePtrRegister<UnsignedIntegralPtr>* getInstance(UnsignedIntegralPtr n) 
         {
             auto it = SRegister::findInstance(n);
@@ -394,6 +387,13 @@ class SRegister : public UniquePtrRegister<UnsignedIntegralPtr> {
         } 
 };
 
+
+template<typename T>
+requires ((Utils::UnsignedIntegralPointerConcept<T>))
+IRegister<T>* getRegisterInstance(T i)
+{
+    return SRegister<T>::getInstance(i);
+}
 
 
 

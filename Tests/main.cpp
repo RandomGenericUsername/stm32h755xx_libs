@@ -1,40 +1,28 @@
+#define CORE_CM7
 #include <iostream>
 #include <InputPin.hh>
-#define CORE_CM7
+#include <PeripheralBaseHandler.hh>
 #include <stm32h755xx.h>
-#include <ClassMembersWithTagHandler.hh>
 
 using namespace std::string_literals;
 
-using GpioStateRegisterPair = pair<InputPinProperties::pinState, volatile unsigned int*>;
-using GpioOtherPropRegisterPair = pair<InputPinProperties::otherProp, volatile unsigned int*>;
-GpioStateRegisterPair a{&(GPIOA->ODR)};
-GpioOtherPropRegisterPair b{&(GPIOA->AFR[0])};
-using GpioSettings = Utils::TypeList<GpioStateRegisterPair, GpioOtherPropRegisterPair>;
-InputPinHandler<GpioSettings> A{a, b};
+volatile uint32_t MODER = 0b11110101101010101100110000001111;
+volatile uint32_t ODR = 124;
 
-
+InputPinHandler fdsa {&MODER, &ODR};
 
 int main(void)
 {
+    fdsa.getRegisterValue<IPinHandlerProperties::mode>();
+    fdsa.clearRegisterValue<IPinHandlerProperties::mode>();
+    auto _1 { fdsa.getParam<InputPinProperties::pinState>() };
+    auto _2 { fdsa.getParam<IPinHandlerProperties::pinNumber>() };
+    
     return 0;
 }
 
 #ifdef compile
 
-
-enum class GpioProps { clockFrequency, outputState, container, instances, objects };
-
-
-using ClockFreqPair = pair<GpioProps::clockFrequency, int>;
-using OutputStatePair = pair<GpioProps::outputState, bool>;
-using ContainerPair32 = pair<GpioProps::container, Cont<uint32_t>>;
-
-
-Cont<uint32_t> a;
-Cont<uint32_t> b{616};
-classMembersWithTags<ClockFreqPair, OutputStatePair> AB{32, false};
-classMembersWithTags<ClockFreqPair, OutputStatePair, ContainerPair32> AV{32, false, b};
 
 template<typename T>
 struct Cont

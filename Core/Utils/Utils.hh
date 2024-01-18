@@ -17,6 +17,9 @@
 
 namespace Utils
 {
+    template<typename Derived, typename Base>
+    concept IsDerivedFrom = std::is_base_of<Base, Derived>::value && std::is_convertible<const volatile Derived*, const volatile Base*>::value;
+
 
     //<-------------------------------------------------------------------->//
     template <typename T>
@@ -115,6 +118,15 @@ namespace Utils
         using TypeListIdentifier = TypeList<Types...>;
     };
 
+
+    template <typename T>
+    struct TypeListSize;
+    
+    template <typename... Types>
+    struct TypeListSize<TypeList<Types...>> {
+        static constexpr size_t value = sizeof...(Types);
+    };
+
     /**
      * @brief A concept that checks if a type is a TypeList.
      *
@@ -135,6 +147,41 @@ namespace Utils
      */
     template <typename T>
     concept IsTypeList = requires { typename T::TypeListIdentifier; };
+
+    // Concept to check if a type is a pair
+    template<typename T, template <auto, typename> class PairType>
+    concept IsPair = requires {
+        typename T::tag;   // Ensure T has a nested 'tag' type
+        typename T::type;  // Ensure T has a nested 'type' type
+        requires std::is_same_v<T, PairType<T::tag::value, typename T::type>>;
+    };
+
+    // Helper to extract types from TypeList
+    template <typename T>
+    struct ExtractTypesFromTypeList;
+
+    template <template <typename...> class TypeList, typename... _Types>
+    struct ExtractTypesFromTypeList<TypeList<_Types...>> {
+        // Using a type alias for the parameter pack itself
+        using Types = TypeList<_Types...>;
+    };
+
+    template <typename T>
+    struct AreAllPairs;
+
+    template <template <auto, typename> class PairType, auto... EnumValues, typename... Types>
+    struct AreAllPairs<TypeList<PairType<EnumValues, Types>...>> {
+        static constexpr bool value = (... && IsPair<PairType<EnumValues, Types>, PairType>);
+    };
+
+    // Concept to check if a type is a TypeList of pairs.
+    template <typename T>
+    concept IsTypeListOfPairs = requires {
+        typename T::TypeListIdentifier; // Ensure T is a TypeList
+        //typename ExtractTypesFromTypeList<T>::Types; // Extract types from TypeList
+        requires AreAllPairs<typename ExtractTypesFromTypeList<T>::Types>::value; // Check if all types in TypeList are pairs
+    };
+
 
     //<-------------------------------------------------------------------->//
 
@@ -287,6 +334,23 @@ namespace Utils
     {
     };
     //<-------------------------------------------------------------------->//
+
+    //<-------------------------------------------------------------------->//
+    template<typename... Lists>
+    struct TypeListConcat;
+
+    template<typename... Types1, typename... Types2>
+    struct TypeListConcat<Utils::TypeList<Types1...>, Utils::TypeList<Types2...>> {
+        using type = Utils::TypeList<Types1..., Types2...>;
+    };
+
+    template<typename... Lists>
+    using ConcatenateTypeList = typename TypeListConcat<Lists...>::type;
+    //<-------------------------------------------------------------------->//
+
+    template<typename EnumProp>
+    requires((IsEnumConcept<EnumProp>) && std::is_convertible_v<EnumProp, std::size_t>)
+    std::size_t CastEnum(const EnumProp& prop){ return static_cast<std::size_t>(prop); }
 
 };
 
