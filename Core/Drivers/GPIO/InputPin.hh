@@ -26,9 +26,10 @@ class InputPinHandler : public InputPinHandlerParent<InputPinHandler>
     public:
         template<typename ...RegisterAddress>
         requires((Utils::UnsignedIntegralPointerConcept<RegisterAddress> && ...))
-        constexpr explicit InputPinHandler(RegisterAddress&&... addresses) : InputPinHandlerParent<InputPinHandler>(std::forward<RegisterAddress>(addresses)...) {
-            InputPinHandlerParent<InputPinHandler>::template setParam<IPinHandlerProperties::mode>(IPinModes::input);
-            setMode();
+        constexpr explicit InputPinHandler(RegisterAddress&&... addresses) 
+            : InputPinHandlerParent<InputPinHandler>(std::forward<RegisterAddress>(addresses)...) {
+                setParam<IPinHandlerProperties::mode>(IPinModes::input);
+                setMode();
         }
 };
 
@@ -49,12 +50,17 @@ private:
 public:
     template<typename ModeRegister, typename StateRegister>
     requires((Utils::UnsignedIntegralPointerConcept<ModeRegister> && Utils::UnsignedIntegralPointerConcept<StateRegister>))
-    explicit InputPin(const ModeRegister moder, const StateRegister ) { _handler.setParam<IPinHandlerProperties::pinNumber>(pinNumber); }
+    explicit InputPin(ModeRegister&& moder, StateRegister&& idr) : _handler(InputPinHandler{std::forward<ModeRegister>(moder), std::forward<StateRegister>(idr)}) {
+        _handler.setParam<IPinHandlerProperties::pinNumber>(PinNumber);
+    }
     ~InputPin() {}
 
     void init() override {}
     void reset() override {}
-    bool read() override { return true; }
+    bool read() override {
+        //return _handler.checkBit<InputPinProperties::pinState>(PinNumber); 
+        return true;
+    }
 };
 
 #ifdef COMPIE

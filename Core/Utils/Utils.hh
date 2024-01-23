@@ -20,6 +20,9 @@ namespace Utils
     template<typename Derived, typename Base>
     concept IsDerivedFrom = std::is_base_of<Base, Derived>::value && std::is_convertible<const volatile Derived*, const volatile Base*>::value;
 
+    template <typename T>
+    concept IsUnsignedIntegral = 
+        (std::is_unsigned_v<std::remove_cv_t<T>> && std::is_integral_v<std::remove_cv_t<T>>);
 
     //<-------------------------------------------------------------------->//
     template <typename T>

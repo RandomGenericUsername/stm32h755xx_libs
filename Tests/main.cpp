@@ -3,14 +3,15 @@
 
 using namespace std::string_literals;
 
-volatile uint32_t MODER = 0b11110101101010101100110000001111;
-volatile uint32_t ODR = 124;
+volatile uint32_t MODER = 0b0;
+volatile uint32_t ODR = 0b11110101101010101100110000001110;
 
 InputPin<0> pin0 {&MODER, &ODR};
 
+
 int main(void)
 {
-    
+    std::cout << pin0.read() << std::endl;
     return 0;
 }
 

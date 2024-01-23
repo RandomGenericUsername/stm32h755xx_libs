@@ -10,6 +10,7 @@
 //<-------------------------------------------------------------------->//
 
 
+
 template<typename PeripheralPropertiesPairs, typename RegisterAddressesPairs, typename PeripheralHandler>
 requires (
     (Utils::IsTypeListOfPairs<PeripheralPropertiesPairs>) && 
@@ -19,12 +20,11 @@ class PeripheralHandlerBase
 {
 private:
 
-    PeripheralHandler* peripheralHandler;
+    PeripheralHandler* peripheralHandler{ nullptr };
     IPeripheralProperties <PeripheralPropertiesPairs> members;
     IPeripheralRegisters<RegisterAddressesPairs> registers;
     
 protected:
-
 
 public:
 
@@ -32,9 +32,12 @@ public:
     template<typename, typename, typename>
     friend class PeripheralHandlerBase;
 
-    template<typename... T>
-    requires (Utils::UnsignedIntegralPointerConcept<T> && ...)
-    constexpr explicit PeripheralHandlerBase(T&&... registerAddresses) : registers(registerAddresses...) { }
+    template<typename... RegisterAddressess>
+    requires ((Utils::UnsignedIntegralPointerConcept<RegisterAddressess> && ...))
+    constexpr explicit PeripheralHandlerBase(PeripheralHandlerBase* handler, RegisterAddressess&&... registerAddresses) 
+        : peripheralHandler(handler), registers(registerAddresses...) {
+    }
+
 
     ~PeripheralHandlerBase() { peripheralHandler = nullptr; }
 

@@ -181,7 +181,7 @@ class Register : public IRegister<UnsignedIntegralPtr>{
          * @param bitsMask Bits mask to set.
          * @param position Starting position to set from.
          */
-        constexpr void setBits(const ValueType bitsMask, const std::size_t position = 0) override {
+        constexpr void setBits(ValueType bitsMask, std::size_t position = 0) override {
             //bool condition = position > sizeof(UnsignedIntegralPtr) * 8 - 1;
             /**
              *  bits -> 0b101 
@@ -297,7 +297,7 @@ public:
         registerPtr->clearBit(position);
     }
 
-    constexpr void setBits(ValueType bitsMask, std::size_t position = 0) override {
+    constexpr void setBits(ValueType bitsMask, std::size_t position) override {
         registerPtr->setBits(bitsMask, position);
     }
 

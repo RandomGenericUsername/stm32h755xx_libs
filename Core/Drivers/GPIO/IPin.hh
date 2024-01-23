@@ -16,14 +16,14 @@ protected:
     const std::size_t pinNumber{PinNumber};
 
 public:
-    //constexpr IPin() = default;
-    //constexpr ~IPin() override = default;
+    constexpr IPin() = default;
+    constexpr ~IPin() = default;
 };
 
 
 enum class IPinModes { input, output, alternateFunction };
 enum class IPinHandlerProperties { pinNumber, mode };
-using PinNumberPair = pair<IPinHandlerProperties::pinNumber, uint32_t>;
+using PinNumberPair = pair<IPinHandlerProperties::pinNumber, std::size_t>;
 using PinModePair = pair<IPinHandlerProperties::mode, IPinModes>;
 using IPinHandlerPropertiesTypeList = Utils::TypeList<PinNumberPair, PinModePair>;
 using IPinHandlerModeRegisterPair = pair<IPinHandlerProperties::mode, volatile uint32_t*>;
@@ -41,18 +41,20 @@ class IPinHandler : public IPinHandlerParent<PinHandler, ExtendedPeripheralPrope
 {
 
     protected:
-
+        using classParent = IPinHandlerParent<PinHandler, ExtendedPeripheralPropertiesPairs, ExtendedRegisterAddressesPairs>;
+        using selfType = IPinHandler<PinHandler, ExtendedPeripheralPropertiesPairs, ExtendedRegisterAddressesPairs>;
     public:
         template<typename ...RegisterAddress>
         requires((Utils::UnsignedIntegralPointerConcept<RegisterAddress> && ...))
         constexpr explicit IPinHandler(RegisterAddress&&... addresses) 
-            : IPinHandlerParent<PinHandler, ExtendedPeripheralPropertiesPairs, ExtendedRegisterAddressesPairs>(std::forward<RegisterAddress>(addresses)...) { }
+            : classParent(this, std::forward<RegisterAddress>(addresses)...) {
+        }
 
         void setMode() { 
             
-            auto mode { static_cast<std::size_t>(this->template getParam<IPinHandlerProperties::mode>()) };
-            auto pinNumber { static_cast<std::size_t>(this->template getParam<IPinHandlerProperties::pinNumber>()) };
-            IPinHandlerParent<PinHandler, ExtendedPeripheralPropertiesPairs, ExtendedRegisterAddressesPairs>::template setBits<IPinHandlerProperties::mode>(mode, pinNumber);
+            std::size_t mode { static_cast<std::size_t>(this->template getParam<IPinHandlerProperties::mode>()) };
+            std::size_t pinNumber { static_cast<std::size_t>(this->template getParam<IPinHandlerProperties::pinNumber>()) };
+            classParent::template setBits<IPinHandlerProperties::mode>(mode, pinNumber);
         }
 };
 
